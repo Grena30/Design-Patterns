@@ -2,7 +2,7 @@ package messaging;
 
 import java.util.Date;
 
-public class TextMessage implements Message {
+public class MessageText implements Message {
     private String messageId;
     private String senderId;
     private String receiverId;
@@ -10,7 +10,7 @@ public class TextMessage implements Message {
     private MessageType messageType;
     private Date date;
 
-    public TextMessage(String messageId, String senderId, String receiverId, String messageText, MessageType messageType, Date date) {
+    public MessageText(String messageId, String senderId, String receiverId, String messageText, MessageType messageType, Date date) {
         this.messageId = messageId;
         this.senderId = senderId;
         this.receiverId = receiverId;

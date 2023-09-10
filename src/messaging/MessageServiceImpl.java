@@ -15,11 +15,16 @@ public class MessageServiceImpl implements MessageService{
 
     @Override
     public void sendMessage(User sender, User receiver, Message message) {
+        if (sender != null && receiver != null && message != null) {
+            messageStorage.saveMessage(message);
+        }
     }
 
     @Override
-    public List<Message> getMessages(User user, User otherUser) {
+    public List<Message> getMessages(User user) {
+        if (user != null) {
+            return messageStorage.getMessagesByUser(user.getUserId());
+        }
         return new ArrayList<>();
     }
-
 }

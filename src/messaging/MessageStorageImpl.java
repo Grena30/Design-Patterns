@@ -13,11 +13,15 @@ public class MessageStorageImpl implements MessageStorage{
 
         @Override
         public void saveMessage(Message message) {
-
+                if (message != null) {
+                        String userId = message.getReceiverId();
+                        List<Message> messages = userMessages.computeIfAbsent(userId, k -> new ArrayList<>());
+                        messages.add(message);
+                }
         }
 
         @Override
         public List<Message> getMessagesByUser(String userId) {
-            return userMessages.getOrDefault(userId, new ArrayList<>());
+                return userMessages.getOrDefault(userId, new ArrayList<>());
         }
 }
