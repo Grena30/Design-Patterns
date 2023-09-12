@@ -1,32 +1,34 @@
 package management;
 
-import user.User;
+import singleton.UserManager;
+import user.RegularUser;
 import user.UserProfile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class UserManagementServiceImpl implements UserManagementService{
 
-        private Map<String, User> users = new HashMap<>();
-
-        public void addUser(User user) {
-                users.put(user.getUserId(), user);
-        }
-        @Override
-        public User getUserById(String userId) {
-                return users.get(userId);
-        }
+        private UserManager userManager = UserManager.getInstance();
 
         @Override
-        public void updateUserProfile(User user, UserProfile profileData) {
+        public RegularUser getUserById(String userId) {
+                for (RegularUser user : userManager.getUsers().values()) {
+                        if (user.getUserId().equals(userId)) {
+                                return user;
+                        }
+                }
+                return null;
+        }
+
+        @Override
+        public void updateUserProfile(RegularUser user, UserProfile profileData) {
                 user.updateProfile(profileData);
         }
 
         @Override
-        public List<User> getUserList() {
-                return new ArrayList<>(users.values());
+        public List<RegularUser> getUserList() {
+                return new ArrayList<>(userManager.getUsers().values());
         }
+
 }

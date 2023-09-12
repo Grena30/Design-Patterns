@@ -5,15 +5,6 @@ public class UserProfile {
     private String name;
     private String profilePictureUrl;
 
-    public UserProfile(String name, String profilePictureUrl) {
-        this.name = name;
-        this.profilePictureUrl = profilePictureUrl;
-    }
-
-    // Default constructor
-    public UserProfile() {
-    }
-
     public String getName() {
         return name;
     }

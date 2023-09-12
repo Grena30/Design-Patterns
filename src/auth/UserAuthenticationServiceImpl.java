@@ -1,23 +1,27 @@
 package auth;
 
-import user.User;
+import singleton.UserManager;
+import user.RegularUser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService{
 
-    private Map<String, User> users = new HashMap<>();
+    private UserManager userManager = UserManager.getInstance();
     private Set<String> loggedInUsers = new HashSet<>();
     private int userIdCounter = 0;
 
     @Override
-    public User registerUser(String username, String password) {
-        if (users.containsKey(username)) {
+    public RegularUser registerUser(String username, String password) {
+        if (userManager.getUsers().containsKey(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
         String userId = generateUniqueUserId();
-        User user = new User(userId, username, password);
-        users.put(username, user);
+        RegularUser user = new RegularUser(userId, username, password);
+        userManager.addUser(user);
         return user;
     }
 
@@ -28,8 +32,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     }
 
     @Override
-    public User login(String username, String password) {
-        User user = users.get(username);
+    public RegularUser login(String username, String password) {
+        RegularUser user = userManager.getUsers().get(username);
         if (user != null && user.getPassword().equals(password)) {
             loggedInUsers.add(username);
             return user;
@@ -38,14 +42,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     }
 
     @Override
-    public void logout(User user) {
+    public void logout(RegularUser user) {
         loggedInUsers.remove(user.getUsername());
     }
 
-    public List<User> getLoggedInUsers() {
-        List<User> loggedInUserList = new ArrayList<>();
+    public List<RegularUser> getLoggedInUsers() {
+        List<RegularUser> loggedInUserList = new ArrayList<>();
         for (String username : loggedInUsers) {
-            User user = users.get(username);
+            RegularUser user = userManager.getUsers().get(username);
             if (user != null) {
                 loggedInUserList.add(user);
             }

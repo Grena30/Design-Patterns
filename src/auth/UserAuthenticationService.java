@@ -1,12 +1,12 @@
 package auth;
 
-import user.User;
+import user.RegularUser;
 
 import java.util.List;
 
 public interface UserAuthenticationService {
-    User registerUser(String username, String password);
-    User login(String username, String password);
-    void logout(User user);
-    List<User> getLoggedInUsers();
+    RegularUser registerUser(String username, String password);
+    RegularUser login(String username, String password);
+    void logout(RegularUser user);
+    List<RegularUser> getLoggedInUsers();
 }

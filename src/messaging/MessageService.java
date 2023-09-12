@@ -1,10 +1,10 @@
 package messaging;
 
-import user.User;
+import user.RegularUser;
 
 import java.util.List;
 
 public interface MessageService {
-    void sendMessage(User sender, User receiver, Message message);
-    List<Message> getMessages(User user);
+    void sendMessage(RegularUser sender, RegularUser receiver, Message message);
+    List<Message> getMessages(RegularUser user);
 }
