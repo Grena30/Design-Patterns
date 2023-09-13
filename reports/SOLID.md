@@ -1,5 +1,5 @@
 # Topic: SOLID Principles
-## Course:
+## Course: Software Design Techniques and Mechanisms
 ## Author: Gutu Dinu
 
 ---
