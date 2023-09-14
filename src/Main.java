@@ -61,27 +61,30 @@ public class Main {
         return choice >= min && choice <= max;
     }
 
+    private static int menu() {
+        System.out.println("\nChat Application Menu:");
+        System.out.println("1. Register a new user");
+        System.out.println("2. Log in");
+        System.out.println("3. Display user info");
+        System.out.println("4. Send a message");
+        System.out.println("5. View messages");
+        System.out.println("6. Log out");
+        System.out.println("7. Exit");
+        System.out.print("Enter your choice: ");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        return choice;
+    }
+
     public static void main(String[] args) {
         UserAuthenticationService authService = new UserAuthenticationServiceImpl();
         UserManagementService userService = new UserManagementServiceImpl();
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
 
-        Scanner scanner = new Scanner(System.in);
-
         while (true) {
-            System.out.println("\nChat Application Menu:");
-            System.out.println("1. Register a new user");
-            System.out.println("2. Log in");
-            System.out.println("3. Display user info");
-            System.out.println("4. Send a message");
-            System.out.println("5. View messages");
-            System.out.println("6. Log out");
-            System.out.println("7. Exit");
-            System.out.print("Enter your choice: ");
-
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            int choice = menu();
 
             switch (choice) {
                 case 1 -> {

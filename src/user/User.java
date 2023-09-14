@@ -1,6 +1,6 @@
 package user;
 
-abstract class User {
+public abstract class User {
     private String userId;
     private String username;
     private String password;
@@ -22,6 +22,8 @@ abstract class User {
     public String getPassword() {
         return this.password;
     }
+
+    public abstract UserType getUserType();
 
     public void displayUserInfo() {}
 }
