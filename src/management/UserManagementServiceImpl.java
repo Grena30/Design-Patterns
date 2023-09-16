@@ -2,6 +2,7 @@ package management;
 
 import singleton.UserManager;
 import user.RegularUser;
+import user.User;
 import user.UserProfile;
 
 import java.util.ArrayList;
@@ -12,8 +13,8 @@ public class UserManagementServiceImpl implements UserManagementService{
         private UserManager userManager = UserManager.getInstance();
 
         @Override
-        public RegularUser getUserById(String userId) {
-                for (RegularUser user : userManager.getUsers().values()) {
+        public User getUserById(String userId) {
+                for (User user : userManager.getUsers().values()) {
                         if (user.getUserId().equals(userId)) {
                                 return user;
                         }
@@ -27,8 +28,12 @@ public class UserManagementServiceImpl implements UserManagementService{
         }
 
         @Override
-        public List<RegularUser> getUserList() {
+        public List<User> getUserList() {
                 return new ArrayList<>(userManager.getUsers().values());
+        }
+
+        public void deleteUser(String userId) {
+                userManager.removeUser(getUserById(userId));
         }
 
 }

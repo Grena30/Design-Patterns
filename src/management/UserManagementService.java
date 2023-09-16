@@ -1,14 +1,16 @@
 package management;
 
 import user.RegularUser;
+import user.User;
 import user.UserProfile;
 
 import java.util.List;
 
 public interface UserManagementService {
 
-    RegularUser getUserById(String userId);
+    User getUserById(String userId);
     void updateUserProfile(RegularUser user, UserProfile profileData);
-    List<RegularUser> getUserList();
+    List<User> getUserList();
+    void deleteUser(String userId);
 
 }

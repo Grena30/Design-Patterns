@@ -2,6 +2,9 @@ package auth;
 
 import singleton.UserManager;
 import user.RegularUser;
+import user.User;
+import factory.*;
+import user.UserType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,17 +13,28 @@ import java.util.Set;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService{
 
-    private UserManager userManager = UserManager.getInstance();
+    private final UserManager userManager = UserManager.getInstance();
     private Set<String> loggedInUsers = new HashSet<>();
     private int userIdCounter = 0;
+    private final UserFactory regularFactory = new RegularUserFactory();
+    private final UserFactory adminFactory = new AdminFactory();
+
 
     @Override
-    public RegularUser registerUser(String username, String password) {
+    public User registerUser(String username, String password, boolean isAdmin) {
         if (userManager.getUsers().containsKey(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
+
         String userId = generateUniqueUserId();
-        RegularUser user = new RegularUser(userId, username, password);
+        User user;
+
+        if (isAdmin) {
+            user = adminFactory.createUser(userId, username, password);
+        } else {
+            user = regularFactory.createUser(userId, username, password);
+        }
+
         userManager.addUser(user);
         return user;
     }
@@ -32,8 +46,8 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     }
 
     @Override
-    public RegularUser login(String username, String password) {
-        RegularUser user = userManager.getUsers().get(username);
+    public User login(String username, String password) {
+        User user = userManager.getUsers().get(username);
         if (user != null && user.getPassword().equals(password)) {
             loggedInUsers.add(username);
             return user;
@@ -42,15 +56,20 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     }
 
     @Override
-    public void logout(RegularUser user) {
+    public void logout(User user) {
         loggedInUsers.remove(user.getUsername());
     }
 
-    public List<RegularUser> getLoggedInUsers() {
-        List<RegularUser> loggedInUserList = new ArrayList<>();
+    public List<User> getLoggedInUsers(boolean isAdmin) {
+        List<User> loggedInUserList = new ArrayList<>();
         for (String username : loggedInUsers) {
-            RegularUser user = userManager.getUsers().get(username);
+            User user = userManager.getUsers().get(username);
             if (user != null) {
+                if (isAdmin && user.getUserType() == UserType.REGULAR_USER) {
+                    continue;
+                } else if (!isAdmin && user.getUserType() == UserType.ADMIN_USER){
+                    continue;
+                }
                 loggedInUserList.add(user);
             }
         }
