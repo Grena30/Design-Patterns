@@ -2,6 +2,7 @@ import auth.*;
 import management.*;
 import messaging.*;
 import user.*;
+import builder.*;
 
 import java.util.Date;
 import java.util.List;
@@ -67,7 +68,8 @@ public class Main {
 
     private static void RegularUserFunctionality(UserAuthenticationService authService,
                                                  UserManagementService userService,
-                                                 MessageService messageService) {
+                                                 MessageService messageService,
+                                                 MessageBuilder messageTextBuilder) {
         while (true) {
             int choice = RegularUserMenu();
             boolean isAdmin = false;
@@ -103,9 +105,14 @@ public class Main {
 
                     System.out.print("Enter your message: ");
                     String messageText = scanner.nextLine();
-                    Message message = new MessageText(
-                            String.valueOf(System.currentTimeMillis()), sender.getUserId(), receiver.getUserId(), messageText,
-                            MessageType.TEXT, new Date());
+                    Message message = messageTextBuilder.messageId(String.valueOf(System.currentTimeMillis()))
+                            .senderId(sender.getUserId())
+                            .receiverId(receiver.getUserId())
+                            .messageData(messageText)
+                            .messageType(MessageType.TEXT)
+                            .date(new Date())
+                            .messageStatus(MessageStatus.SENT)
+                            .build();
                     messageService.sendMessage(sender, receiver, message);
                     System.out.println("Message sent.");
                 }
@@ -232,7 +239,7 @@ public class Main {
         List<Message> messages = messageService.getMessages(selectedUser);
         for (Message msg : messages) {
             User senderUser = userService.getUserById(msg.getSenderId());
-            System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageText() + ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate());
+            System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageData());
         }
     }
 
@@ -257,6 +264,7 @@ public class Main {
         UserManagementService userService = new UserManagementServiceImpl();
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
+        MessageBuilder messageTextBuilder = new MessageTextBuilder();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -272,7 +280,7 @@ public class Main {
             switch (choice) {
 
                 case 1 -> AdminUserFunctionality(authService, userService, messageService);
-                case 2 -> RegularUserFunctionality(authService, userService, messageService);
+                case 2 -> RegularUserFunctionality(authService, userService, messageService, messageTextBuilder);
                 case 3 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();

@@ -9,14 +9,17 @@ public class MessageText implements Message {
     private String messageText;
     private MessageType messageType;
     private Date date;
+    private MessageStatus messageStatus;
 
-    public MessageText(String messageId, String senderId, String receiverId, String messageText, MessageType messageType, Date date) {
+    public MessageText(String messageId, String senderId, String receiverId, String messageText,
+                       MessageType messageType, Date date, MessageStatus messageStatus) {
         this.messageId = messageId;
         this.senderId = senderId;
         this.receiverId = receiverId;
         this.messageText = messageText;
         this.messageType = messageType;
         this.date = date;
+        this.messageStatus = messageStatus;
     }
 
     public String getMessageId() {
@@ -31,7 +34,7 @@ public class MessageText implements Message {
         return receiverId;
     }
 
-    public String getMessageText() {
+    public String getMessageData() {
         return messageText;
     }
 
@@ -41,5 +44,9 @@ public class MessageText implements Message {
 
     public Date getDate() {
         return date;
+    }
+
+    public MessageStatus getMessageStatus() {
+        return messageStatus;
     }
 }

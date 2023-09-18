@@ -6,7 +6,8 @@ public interface Message {
     String getMessageId();
     String getSenderId();
     String getReceiverId();
-    String getMessageText();
+    String getMessageData();
     MessageType getMessageType();
     Date getDate();
+    MessageStatus getMessageStatus();
 }
