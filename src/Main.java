@@ -122,7 +122,6 @@ public class Main {
                     if (user == null) {
                         break;
                     }
-                    authService.logout(user);
 
                     getLoggedInUsers(authService, isAdmin);
                     System.out.print("Enter new username (empty for no change): ");

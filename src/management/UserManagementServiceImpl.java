@@ -42,6 +42,7 @@ public class UserManagementServiceImpl implements UserManagementService{
         public void changeUserName(String userId, String newUsername) {
                 if (newUsername != null && !newUsername.isEmpty()) {
                         User user = getUserById(userId);
+                        userManager.getUsers().remove(user.getUsername());
                         user.setUsername(newUsername);
                         userManager.getUsers().put(newUsername, user);
                 }
