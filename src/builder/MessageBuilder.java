@@ -7,12 +7,12 @@ import messaging.MessageType;
 import java.util.Date;
 
 public interface MessageBuilder {
-    MessageBuilder messageId(String messageId);
-    MessageBuilder senderId(String senderId);
-    MessageBuilder receiverId(String receiverId);
-    MessageBuilder messageData(String messageData);
-    MessageBuilder messageType(MessageType messageType);
-    MessageBuilder date(Date date);
-    MessageBuilder messageStatus(MessageStatus messageStatus);
+    void setMessageId(String messageId);
+    void setSenderId(String senderId);
+    void setReceiverId(String receiverId);
+    void setMessageData(String messageData);
+    void setMessageType(MessageType messageType);
+    void setDate(Date date);
+    void setMessageStatus(MessageStatus messageStatus);
     Message build();
 }

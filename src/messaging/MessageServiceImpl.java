@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MessageServiceImpl implements MessageService{
 
-    private MessageStorage messageStorage;
+    private final MessageStorage messageStorage;
 
     public MessageServiceImpl(MessageStorage messageStorage) {
         this.messageStorage = messageStorage;

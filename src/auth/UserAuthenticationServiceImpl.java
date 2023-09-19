@@ -1,10 +1,9 @@
 package auth;
 
 import singleton.UserManager;
-import user.RegularUser;
 import user.User;
-import factory.*;
 import user.UserType;
+import objectpool.UserPool;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,11 +13,13 @@ import java.util.Set;
 public class UserAuthenticationServiceImpl implements UserAuthenticationService{
 
     private final UserManager userManager = UserManager.getInstance();
-    private Set<String> loggedInUsers = new HashSet<>();
+    private final Set<String> loggedInUsers = new HashSet<>();
     private int userIdCounter = 0;
-    private final UserFactory regularFactory = new RegularUserFactory();
-    private final UserFactory adminFactory = new AdminFactory();
+    private final UserPool userPool;
 
+    public UserAuthenticationServiceImpl(UserPool userPool) {
+        this.userPool = userPool;
+    }
 
     @Override
     public User registerUser(String username, String password, boolean isAdmin) {
@@ -27,15 +28,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
         }
 
         String userId = generateUniqueUserId();
-        User user;
+        User user = userPool.acquireUser(userId, username, password, isAdmin);
 
-        if (isAdmin) {
-            user = adminFactory.createUser(userId, username, password);
-        } else {
-            user = regularFactory.createUser(userId, username, password);
-        }
-
-        userManager.addUser(user);
+        userManager.getUsers().put(username, user);
         return user;
     }
 

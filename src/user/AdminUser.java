@@ -6,6 +6,7 @@ public class AdminUser extends User {
         super(userId, username, password);
     }
 
+    @Override
     public UserType getUserType() {
         return UserType.ADMIN_USER;
     }

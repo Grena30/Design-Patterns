@@ -1,6 +1,10 @@
 import auth.*;
+import factory.AdminFactory;
+import factory.RegularUserFactory;
+import factory.UserFactory;
 import management.*;
 import messaging.*;
+import objectpool.UserPool;
 import user.*;
 import builder.*;
 
@@ -63,13 +67,15 @@ public class Main {
         System.out.println("2. Log in");
         System.out.println("3. Display user profile info");
         System.out.println("4. Send a message");
+        System.out.println("5. Change user info");
         return CommonMenu();
     }
 
     private static void RegularUserFunctionality(UserAuthenticationService authService,
                                                  UserManagementService userService,
                                                  MessageService messageService,
-                                                 MessageBuilder messageTextBuilder) {
+                                                 MessageDirector messageDirector,
+                                                 MessageBuilder messageBuilder) {
         while (true) {
             int choice = RegularUserMenu();
             boolean isAdmin = false;
@@ -105,18 +111,28 @@ public class Main {
 
                     System.out.print("Enter your message: ");
                     String messageText = scanner.nextLine();
-                    Message message = messageTextBuilder.messageId(String.valueOf(System.currentTimeMillis()))
-                            .senderId(sender.getUserId())
-                            .receiverId(receiver.getUserId())
-                            .messageData(messageText)
-                            .messageType(MessageType.TEXT)
-                            .date(new Date())
-                            .messageStatus(MessageStatus.SENT)
-                            .build();
+                    Message message = messageDirector.constructTextMessage(messageBuilder, sender.getUserId(), receiver.getUserId(), messageText);
                     messageService.sendMessage(sender, receiver, message);
                     System.out.println("Message sent.");
                 }
                 case 5 -> {
+                    User user = validSelection(authService, "user", isAdmin);
+
+                    if (user == null) {
+                        break;
+                    }
+                    authService.logout(user);
+
+                    getLoggedInUsers(authService, isAdmin);
+                    System.out.print("Enter new username (empty for no change): ");
+                    String newUsername = scanner.nextLine();
+                    userService.changeUserName(user.getUserId(), newUsername);
+
+                    System.out.print("Enter new password (empty for no change): ");
+                    String newPassword = scanner.nextLine();
+                    userService.changeUserPassword(user.getUserId(), newPassword);
+                }
+                case 6 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
 
                     if (selectedUser == null) {
@@ -125,7 +141,7 @@ public class Main {
 
                     viewMessages(userService, messageService, selectedUser);
                 }
-                case 6 -> {
+                case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
 
                     if (selectedUser == null) {
@@ -135,10 +151,10 @@ public class Main {
                     authService.logout(selectedUser);
                     System.out.println(selectedUser.getUsername() + " logged out successfully.");
                 }
-                case 7 -> {
+                case 8 -> {
                     return;
                 }
-                case 8 -> {
+                case 9 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();
                     System.exit(0);
@@ -163,8 +179,9 @@ public class Main {
         System.out.println("\nManagement Menu:");
         System.out.println("1. Register a new admin user");
         System.out.println("2. Log in");
-        System.out.println("3. Display user info");
+        System.out.println("3. Display admin info");
         System.out.println("4. Remove user");
+        System.out.println("5. Display all users");
         return CommonMenu();
     }
 
@@ -192,7 +209,7 @@ public class Main {
                     selectedUser.displayUserInfo();
                 }
                 case 4 ->{
-                    User selectedUser = validSelection(authService, "user", false);
+                    User selectedUser = validSelection(authService, "user", !isAdmin);
 
                     if (selectedUser == null) {
                         break;
@@ -202,7 +219,10 @@ public class Main {
                     System.out.println("User deleted: " + selectedUser.getUsername());
                 }
                 case 5 ->{
-                    User selectedUser = validSelection(authService, "user", false);
+                    System.out.println("All users:" + userService.getUserList());
+                }
+                case 6 -> {
+                    User selectedUser = validSelection(authService, "user", !isAdmin);
 
                     if (selectedUser == null) {
                         break;
@@ -210,7 +230,7 @@ public class Main {
 
                     viewMessages(userService, messageService, selectedUser);
                 }
-                case 6 -> {
+                case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
 
                     if (selectedUser == null) {
@@ -220,10 +240,10 @@ public class Main {
                     authService.logout(selectedUser);
                     System.out.println(selectedUser.getUsername() + " logged out successfully.");
                 }
-                case 7 -> {
+                case 8 -> {
                     return;
                 }
-                case 8 -> {
+                case 9 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();
                     System.exit(0);
@@ -239,15 +259,21 @@ public class Main {
         List<Message> messages = messageService.getMessages(selectedUser);
         for (Message msg : messages) {
             User senderUser = userService.getUserById(msg.getSenderId());
-            System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageData());
+            if (senderUser != null) {
+                System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageData() +
+                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus());
+            } else {
+                System.out.println("From: Nonexistent user, Message: " + msg.getMessageData() +
+                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus());
+            }
         }
     }
 
     private static int CommonMenu() {
-        System.out.println("5. View messages");
-        System.out.println("6. Log out");
-        System.out.println("7. Return to main menu");
-        System.out.println("8. Exit");
+        System.out.println("6. View messages");
+        System.out.println("7. Log out");
+        System.out.println("8. Return to main menu");
+        System.out.println("9. Exit");
         System.out.print("Enter your choice: ");
 
         int choice = scanner.nextInt();
@@ -260,11 +286,18 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        UserAuthenticationService authService = new UserAuthenticationServiceImpl();
-        UserManagementService userService = new UserManagementServiceImpl();
+        UserFactory regularFactory = new RegularUserFactory();
+        UserFactory adminFactory = new AdminFactory();
+        UserPool userPool = new UserPool(10, regularFactory, adminFactory);
+
+        UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool);
+        UserManagementService userService = new UserManagementServiceImpl(userPool);
+
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
-        MessageBuilder messageTextBuilder = new MessageTextBuilder();
+
+        MessageBuilder messageBuilder = new MessageDataBuilder();
+        MessageDirector messageDirector = new MessageDirector();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -280,7 +313,7 @@ public class Main {
             switch (choice) {
 
                 case 1 -> AdminUserFunctionality(authService, userService, messageService);
-                case 2 -> RegularUserFunctionality(authService, userService, messageService, messageTextBuilder);
+                case 2 -> RegularUserFunctionality(authService, userService, messageService, messageDirector, messageBuilder);
                 case 3 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();
