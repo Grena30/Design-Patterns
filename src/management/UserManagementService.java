@@ -1,8 +1,6 @@
 package management;
 
-import user.RegularUser;
 import user.User;
-import user.UserProfile;
 
 import java.util.List;
 
