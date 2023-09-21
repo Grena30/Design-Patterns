@@ -9,11 +9,12 @@ import java.util.List;
 
 public class UserManagementServiceImpl implements UserManagementService{
 
-        private final UserManager userManager = UserManager.getInstance();
+        private final UserManager userManager;
         private final UserPool userPool;
 
-        public UserManagementServiceImpl(UserPool userPool) {
+        public UserManagementServiceImpl(UserPool userPool, UserManager userManager) {
                 this.userPool = userPool;
+                this.userManager = userManager;
         }
 
         @Override
@@ -39,19 +40,15 @@ public class UserManagementServiceImpl implements UserManagementService{
         }
 
         @Override
-        public void changeUserName(String userId, String newUsername) {
+        public void updateUser(String userId, String newUsername, String newPassword) {
+                User user = getUserById(userId);
                 if (newUsername != null && !newUsername.isEmpty()) {
-                        User user = getUserById(userId);
                         userManager.getUsers().remove(user.getUsername());
                         user.setUsername(newUsername);
                         userManager.getUsers().put(newUsername, user);
                 }
-        }
 
-        @Override
-        public void changeUserPassword(String userId, String newPassword) {
                 if (newPassword != null && !newPassword.isEmpty()) {
-                        User user = getUserById(userId);
                         user.setPassword(newPassword);
                 }
         }

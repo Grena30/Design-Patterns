@@ -1,9 +1,9 @@
 package auth;
 
+import objectpool.UserPool;
 import singleton.UserManager;
 import user.User;
 import user.UserType;
-import objectpool.UserPool;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,13 +12,14 @@ import java.util.Set;
 
 public class UserAuthenticationServiceImpl implements UserAuthenticationService{
 
-    private final UserManager userManager = UserManager.getInstance();
+    private final UserManager userManager;
+    private final UserPool userPool;
     private final Set<String> loggedInUsers = new HashSet<>();
     private int userIdCounter = 0;
-    private final UserPool userPool;
 
-    public UserAuthenticationServiceImpl(UserPool userPool) {
+    public UserAuthenticationServiceImpl(UserPool userPool, UserManager userManager) {
         this.userPool = userPool;
+        this.userManager = userManager;
     }
 
     @Override

@@ -4,14 +4,14 @@ import factory.RegularUserFactory;
 import factory.UserFactory;
 import management.*;
 import messaging.*;
-import objectpool.UserPool;
+import objectpool.*;
+import singleton.*;
 import user.*;
 import builder.*;
 
 import java.util.List;
 import java.util.Scanner;
 
-// TODO: Fix user management methods relating to user changes
 
 public class Main {
 
@@ -126,11 +126,10 @@ public class Main {
                     getLoggedInUsers(authService, isAdmin);
                     System.out.print("Enter new username (empty for no change): ");
                     String newUsername = scanner.nextLine();
-                    userService.changeUserName(user.getUserId(), newUsername);
 
                     System.out.print("Enter new password (empty for no change): ");
                     String newPassword = scanner.nextLine();
-                    userService.changeUserPassword(user.getUserId(), newPassword);
+                    userService.updateUser(user.getUserId(), newUsername, newPassword);
                 }
                 case 6 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
@@ -261,10 +260,10 @@ public class Main {
             User senderUser = userService.getUserById(msg.getSenderId());
             if (senderUser != null) {
                 System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageData() +
-                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus());
+                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus() + ", ID: " + msg.getMessageId());
             } else {
                 System.out.println("From: Nonexistent user, Message: " + msg.getMessageData() +
-                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus());
+                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus() + ", ID: " + msg.getMessageId());
             }
         }
     }
@@ -288,10 +287,11 @@ public class Main {
     public static void main(String[] args) {
         UserFactory regularFactory = new RegularUserFactory();
         UserFactory adminFactory = new AdminFactory();
-        UserPool userPool = new UserPool(10, regularFactory, adminFactory);
+        UserManager userManager = UserManagerImpl.getInstance();
+        UserPool userPool = new UserPoolImpl(10, regularFactory, adminFactory);
 
-        UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool);
-        UserManagementService userService = new UserManagementServiceImpl(userPool);
+        UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool, userManager);
+        UserManagementService userService = new UserManagementServiceImpl(userPool, userManager);
 
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
