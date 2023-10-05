@@ -1,19 +1,25 @@
 package management;
 
+import objectpool.UserPool;
 import singleton.UserManager;
-import user.RegularUser;
-import user.UserProfile;
+import user.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserManagementServiceImpl implements UserManagementService{
 
-        private UserManager userManager = UserManager.getInstance();
+        private final UserManager userManager;
+        private final UserPool userPool;
+
+        public UserManagementServiceImpl(UserPool userPool, UserManager userManager) {
+                this.userPool = userPool;
+                this.userManager = userManager;
+        }
 
         @Override
-        public RegularUser getUserById(String userId) {
-                for (RegularUser user : userManager.getUsers().values()) {
+        public User getUserById(String userId) {
+                for (User user : userManager.getUsers().values()) {
                         if (user.getUserId().equals(userId)) {
                                 return user;
                         }
@@ -22,13 +28,29 @@ public class UserManagementServiceImpl implements UserManagementService{
         }
 
         @Override
-        public void updateUserProfile(RegularUser user, UserProfile profileData) {
-                user.updateProfile(profileData);
+        public List<User> getUserList() {
+                return new ArrayList<>(userManager.getUsers().values());
         }
 
         @Override
-        public List<RegularUser> getUserList() {
-                return new ArrayList<>(userManager.getUsers().values());
+        public void deleteUser(String userId) {
+                userPool.releaseUser(getUserById(userId));
+                userManager.getUsers().remove(getUserById(userId).getUsername());
+
+        }
+
+        @Override
+        public void updateUser(String userId, String newUsername, String newPassword) {
+                User user = getUserById(userId);
+                if (newUsername != null && !newUsername.isEmpty()) {
+                        userManager.getUsers().remove(user.getUsername());
+                        user.setUsername(newUsername);
+                        userManager.getUsers().put(newUsername, user);
+                }
+
+                if (newPassword != null && !newPassword.isEmpty()) {
+                        user.setPassword(newPassword);
+                }
         }
 
 }
