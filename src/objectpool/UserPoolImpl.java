@@ -8,14 +8,10 @@ import java.util.List;
 
 public class UserPoolImpl implements UserPool{
 
-    private final UserFactory regularFactory;
-    private final UserFactory adminFactory;
     private final List<User> userPool;
     private final int maxSize;
 
-    public UserPoolImpl(int maxSize, UserFactory regularFactory, UserFactory adminFactory) {
-        this.regularFactory = regularFactory;
-        this.adminFactory = adminFactory;
+    public UserPoolImpl(int maxSize) {
         this.maxSize = maxSize;
         this.userPool = new ArrayList<>(maxSize);
     }
@@ -24,7 +20,6 @@ public class UserPoolImpl implements UserPool{
         if (userPool.isEmpty()) {
             return createUser(userId, username, password, isAdmin);
         } else {
-            // Reuse an existing User object from the pool
             User user = userPool.remove(0);
             user.setUserId(userId);
             user.setUsername(username);
@@ -39,16 +34,15 @@ public class UserPoolImpl implements UserPool{
         }
 
         if (userPool.size() < maxSize) {
-            // Return the User object to the pool if it's not full
             userPool.add(user);
         }
     }
 
     private User createUser(String userId, String username, String password, boolean isAdmin) {
         if (isAdmin) {
-            return adminFactory.createUser(userId, username, password);
+            return UserFactory.getUser(userId, username, password, UserType.ADMIN_USER);
         } else {
-            return regularFactory.createUser(userId, username, password);
+            return UserFactory.getUser(userId, username, password, UserType.REGULAR_USER);
         }
     }
 }

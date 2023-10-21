@@ -1,9 +1,6 @@
 import auth.*;
 import decorator.EncryptionDecorator;
 import decorator.MessageServiceDecorator;
-import factory.AdminFactory;
-import factory.RegularUserFactory;
-import factory.UserFactory;
 import management.*;
 import messaging.*;
 import objectpool.*;
@@ -312,10 +309,8 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        UserFactory regularFactory = new RegularUserFactory();
-        UserFactory adminFactory = new AdminFactory();
         UserManager userManager = UserManagerImpl.getInstance();
-        UserPool userPool = new UserPoolImpl(10, regularFactory, adminFactory);
+        UserPool userPool = new UserPoolImpl(10);
 
         UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool, userManager);
         UserManagementService userService = new UserManagementServiceImpl(userPool, userManager);
