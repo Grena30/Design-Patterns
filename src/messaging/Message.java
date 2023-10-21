@@ -1,6 +1,7 @@
 package messaging;
 
 import java.util.Date;
+import java.util.List;
 
 public interface Message {
     String getMessageId();
@@ -10,4 +11,6 @@ public interface Message {
     MessageType getMessageType();
     Date getDate();
     MessageStatus getMessageStatus();
+
+    void setMessageData(String messageData);
 }

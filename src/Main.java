@@ -1,4 +1,6 @@
 import auth.*;
+import decorator.EncryptionDecorator;
+import decorator.MessageServiceDecorator;
 import factory.AdminFactory;
 import factory.RegularUserFactory;
 import factory.UserFactory;
@@ -32,6 +34,11 @@ public class Main {
         String regPassword = scanner.nextLine();
 
         return List.of(regUsername, regPassword);
+    }
+
+    private static String inputPassword() {
+        System.out.print("Enter password: ");
+        return scanner.nextLine();
     }
 
     private static List<User> getLoggedInUsers(UserAuthenticationService authService, boolean isAdmin) {
@@ -74,7 +81,7 @@ public class Main {
 
     private static void RegularUserFunctionality(UserAuthenticationService authService,
                                                  UserManagementService userService,
-                                                 MessageService messageService,
+                                                 MessageServiceDecorator encryptionDecorator,
                                                  MessageDirector messageDirector,
                                                  MessageBuilder messageBuilder) {
         while (true) {
@@ -113,7 +120,7 @@ public class Main {
                     System.out.print("Enter your message: ");
                     String messageText = scanner.nextLine();
                     Message message = messageDirector.constructTextMessage(messageBuilder, sender.getUserId(), receiver.getUserId(), messageText);
-                    messageService.sendMessage(sender, receiver, message);
+                    encryptionDecorator.sendMessage(sender, receiver, message);
                     System.out.println("Message sent.");
                 }
                 case 5 -> {
@@ -138,7 +145,7 @@ public class Main {
                         break;
                     }
 
-                    viewMessages(userService, messageService, selectedUser);
+                    viewMessages(authService, userService, encryptionDecorator, selectedUser);
                 }
                 case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
@@ -186,7 +193,7 @@ public class Main {
 
     private static void AdminUserFunctionality(UserAuthenticationService authService,
                                                UserManagementService userService,
-                                               MessageService messageService) {
+                                               MessageServiceDecorator encryptionDecorator) {
         while (true) {
             int choice = AdminUserMenu();
             boolean isAdmin = true;
@@ -217,9 +224,7 @@ public class Main {
                     userService.deleteUser(selectedUser.getUserId());
                     System.out.println("User deleted: " + selectedUser.getUsername());
                 }
-                case 5 ->{
-                    System.out.println("All users:" + userService.getUserList());
-                }
+                case 5 -> System.out.println("All users:" + userService.getUserList());
                 case 6 -> {
                     User selectedUser = validSelection(authService, "user", !isAdmin);
 
@@ -227,7 +232,7 @@ public class Main {
                         break;
                     }
 
-                    viewMessages(userService, messageService, selectedUser);
+                    viewMessagesAdmin(userService, encryptionDecorator, selectedUser);
                 }
                 case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
@@ -253,9 +258,31 @@ public class Main {
 
     }
 
-    private static void viewMessages(UserManagementService userService, MessageService messageService, User selectedUser) {
+    private static void viewMessages(UserAuthenticationService authService, UserManagementService userService, MessageServiceDecorator messageService, User selectedUser) {
+        String input = inputPassword();
+        User loggedInUser = authService.login(selectedUser.getUsername(), input);
         System.out.println("Messages for " + selectedUser.getUsername() + ":");
         List<Message> messages = messageService.getMessages(selectedUser);
+
+        if (loggedInUser == null) {
+            messages = messageService.getMessages(selectedUser);
+        }
+        else {
+            messages = messageService.sendUserMessages(messages);
+        }
+
+        PrintMessages(userService, messages);
+    }
+
+    private static void viewMessagesAdmin(UserManagementService userService, MessageServiceDecorator messageService, User selectedUser) {
+        System.out.println("Messages for " + selectedUser.getUsername() + ":");
+        List<Message> messages = messageService.getMessages(selectedUser);
+        messages = messageService.sendUserMessages(messages);
+
+        PrintMessages(userService, messages);
+    }
+
+    private static void PrintMessages(UserManagementService userService, List<Message> messages) {
         for (Message msg : messages) {
             User senderUser = userService.getUserById(msg.getSenderId());
             if (senderUser != null) {
@@ -295,6 +322,7 @@ public class Main {
 
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
+        MessageServiceDecorator encryptionDecorator = new EncryptionDecorator(messageService);
 
         MessageBuilder messageBuilder = new MessageDataBuilder();
         MessageDirector messageDirector = new MessageDirector();
@@ -312,8 +340,8 @@ public class Main {
 
             switch (choice) {
 
-                case 1 -> AdminUserFunctionality(authService, userService, messageService);
-                case 2 -> RegularUserFunctionality(authService, userService, messageService, messageDirector, messageBuilder);
+                case 1 -> AdminUserFunctionality(authService, userService, encryptionDecorator);
+                case 2 -> RegularUserFunctionality(authService, userService, encryptionDecorator, messageDirector, messageBuilder);
                 case 3 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();

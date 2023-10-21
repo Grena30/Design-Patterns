@@ -7,4 +7,5 @@ import java.util.List;
 public interface MessageService {
     void sendMessage(User sender, User receiver, Message message);
     List<Message> getMessages(User user);
+    List<Message> sendUserMessages(List<Message> messages);
 }

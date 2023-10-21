@@ -27,4 +27,10 @@ public class MessageServiceImpl implements MessageService{
         }
         return new ArrayList<>();
     }
+
+    @Override
+    public List<Message> sendUserMessages(List<Message> messages) {
+            return messages;
+    }
+
 }
