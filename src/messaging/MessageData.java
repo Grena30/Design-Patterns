@@ -56,7 +56,6 @@ public class MessageData implements Message {
     public MessageStatus getMessageStatus() {
         return messageStatus;
     }
-
     @Override
     public void setMessageData(String messageData) {
         this.messageText = messageData;
