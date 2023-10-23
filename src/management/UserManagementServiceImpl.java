@@ -7,7 +7,7 @@ import user.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserManagementServiceImpl implements UserManagementService{
+public class UserManagementServiceImpl implements UserManagementService, UserAdditionService{
 
         private final UserManager userManager;
         private final UserPool userPool;
@@ -51,6 +51,15 @@ public class UserManagementServiceImpl implements UserManagementService{
                 if (newPassword != null && !newPassword.isEmpty()) {
                         user.setPassword(newPassword);
                 }
+        }
+
+        @Override
+        public void addUser(String username, String password, boolean isAdmin) {
+                // TODO: Change this to use a unique userId
+                String userId = "1";
+                User user = userPool.acquireUser(userId, username, password, isAdmin);
+
+                userManager.getUsers().put(username, user);
         }
 
 }

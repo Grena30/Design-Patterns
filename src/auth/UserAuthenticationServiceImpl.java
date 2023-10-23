@@ -23,16 +23,14 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     }
 
     @Override
-    public User registerUser(String username, String password, boolean isAdmin) {
+    public void registerUser(String username, String password, boolean isAdmin) {
         if (userManager.getUsers().containsKey(username)) {
             throw new IllegalArgumentException("Username already exists");
         }
 
         String userId = generateUniqueUserId();
         User user = userPool.acquireUser(userId, username, password, isAdmin);
-
         userManager.getUsers().put(username, user);
-        return user;
     }
 
     private String generateUniqueUserId() {

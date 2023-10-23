@@ -1,3 +1,4 @@
+import adapter.UserAuthenticationAdapter;
 import auth.*;
 import decorator.EncryptionDecorator;
 import decorator.MessageServiceDecorator;
@@ -88,8 +89,8 @@ public class Main {
             switch (choice) {
                 case 1 -> {
                     List<String> input = inputPrompt();
-                    User registeredUser = authService.registerUser(input.get(0), input.get(1), isAdmin);
-                    System.out.println("User registered: " + registeredUser.getUsername());
+                    authService.registerUser(input.get(0), input.get(1), isAdmin);
+                    System.out.println("User registered: " + input.get(0));
                 }
                 case 2 -> login(authService);
                 case 3 -> {
@@ -183,14 +184,15 @@ public class Main {
         System.out.println("1. Register a new admin user");
         System.out.println("2. Log in");
         System.out.println("3. Display admin info");
-        System.out.println("4. Remove user");
+        System.out.println("4. Remove/add a user");
         System.out.println("5. Display all users");
         return CommonMenu();
     }
 
     private static void AdminUserFunctionality(UserAuthenticationService authService,
                                                UserManagementService userService,
-                                               MessageServiceDecorator encryptionDecorator) {
+                                               MessageServiceDecorator encryptionDecorator,
+                                               UserAdditionService userAuthenticationAdapter) {
         while (true) {
             int choice = AdminUserMenu();
             boolean isAdmin = true;
@@ -198,8 +200,8 @@ public class Main {
             switch (choice) {
                 case 1 -> {
                     List<String> input = inputPrompt();
-                    User registeredUser = authService.registerUser(input.get(0), input.get(1), isAdmin);
-                    System.out.println("User registered: " + registeredUser.getUsername());
+                    authService.registerUser(input.get(0), input.get(1), isAdmin);
+                    System.out.println("User registered: " + input.get(0));
                 }
                 case 2 -> login(authService);
                 case 3 -> {
@@ -212,14 +214,35 @@ public class Main {
                     selectedUser.displayUserInfo();
                 }
                 case 4 ->{
-                    User selectedUser = validSelection(authService, "user", !isAdmin);
 
-                    if (selectedUser == null) {
-                        break;
+                    System.out.println("1. Remove a user");
+                    System.out.println("2. Add a user");
+                    String input = scanner.nextLine();
+
+                    if (input.equals("1")) {
+                        User selectedUser = validSelection(authService, "user", !isAdmin);
+
+                        if (selectedUser == null) {
+                            break;
+                        }
+
+                        userService.deleteUser(selectedUser.getUserId());
+                        System.out.println("User deleted: " + selectedUser.getUsername());
                     }
 
-                    userService.deleteUser(selectedUser.getUserId());
-                    System.out.println("User deleted: " + selectedUser.getUsername());
+                    else if (input.equals("2")) {
+                        System.out.println("Enter user name: ");
+                        String username = scanner.nextLine();
+                        System.out.println("Enter password: ");
+                        String password = scanner.nextLine();
+                        System.out.println("Enter user type (admin/regular): ");
+                        String userType = scanner.nextLine();
+                        userAuthenticationAdapter.addUser(username, password, userType.equals("admin"));
+                    }
+
+                    else {
+                        System.out.println("Invalid choice.");
+                    }
                 }
                 case 5 -> System.out.println("All users:" + userService.getUserList());
                 case 6 -> {
@@ -314,6 +337,7 @@ public class Main {
 
         UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool, userManager);
         UserManagementService userService = new UserManagementServiceImpl(userPool, userManager);
+        UserAdditionService userAuthenticationAdapter = new UserAuthenticationAdapter(authService);
 
         MessageStorage messageStorage = new MessageStorageImpl();
         MessageService messageService = new MessageServiceImpl(messageStorage);
@@ -335,7 +359,7 @@ public class Main {
 
             switch (choice) {
 
-                case 1 -> AdminUserFunctionality(authService, userService, encryptionDecorator);
+                case 1 -> AdminUserFunctionality(authService, userService, encryptionDecorator, userAuthenticationAdapter);
                 case 2 -> RegularUserFunctionality(authService, userService, encryptionDecorator, messageDirector, messageBuilder);
                 case 3 -> {
                     System.out.println("Exiting Application.");

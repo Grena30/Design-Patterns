@@ -10,5 +10,4 @@ public interface UserManagementService {
     List<User> getUserList();
     void deleteUser(String userId);
     void updateUser(String userId, String newUsername, String newPassword);
-
 }
