@@ -6,9 +6,9 @@ import user.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EncryptionDecorator extends MessageServiceDecorator{
+public class MessageEncryptionDecorator extends MessageServiceDecorator {
 
-    public EncryptionDecorator(MessageService messageService) {
+    public MessageEncryptionDecorator(MessageService messageService) {
         super(messageService);
     }
 

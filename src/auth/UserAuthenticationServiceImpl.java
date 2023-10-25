@@ -3,6 +3,7 @@ package auth;
 import objectpool.UserPool;
 import singleton.UserManager;
 import user.User;
+import user.UserIdGenerator;
 import user.UserType;
 
 import java.util.ArrayList;
@@ -10,12 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class UserAuthenticationServiceImpl implements UserAuthenticationService{
+public class UserAuthenticationServiceImpl implements UserAuthenticationService {
 
     private final UserManager userManager;
     private final UserPool userPool;
     private final Set<String> loggedInUsers = new HashSet<>();
-    private int userIdCounter = 0;
 
     public UserAuthenticationServiceImpl(UserPool userPool, UserManager userManager) {
         this.userPool = userPool;
@@ -28,15 +28,9 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
             throw new IllegalArgumentException("Username already exists");
         }
 
-        String userId = generateUniqueUserId();
+        String userId = UserIdGenerator.generateUniqueUserId();
         User user = userPool.acquireUser(userId, username, password, isAdmin);
         userManager.getUsers().put(username, user);
-    }
-
-    private String generateUniqueUserId() {
-        String userId = "user_" + userIdCounter;
-        userIdCounter++;
-        return userId;
     }
 
     @Override

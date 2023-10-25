@@ -1,7 +1,6 @@
 import adapter.UserAuthenticationAdapter;
 import auth.*;
-import decorator.EncryptionDecorator;
-import decorator.MessageServiceDecorator;
+import facade.MessageCommunicationFacade;
 import management.*;
 import messaging.*;
 import objectpool.*;
@@ -79,9 +78,9 @@ public class Main {
 
     private static void RegularUserFunctionality(UserAuthenticationService authService,
                                                  UserManagementService userService,
-                                                 MessageServiceDecorator encryptionDecorator,
                                                  MessageDirector messageDirector,
-                                                 MessageBuilder messageBuilder) {
+                                                 MessageBuilder messageBuilder,
+                                                 MessageCommunicationFacade messageCommunicationFacade) {
         while (true) {
             int choice = RegularUserMenu();
             boolean isAdmin = false;
@@ -118,8 +117,7 @@ public class Main {
                     System.out.print("Enter your message: ");
                     String messageText = scanner.nextLine();
                     Message message = messageDirector.constructTextMessage(messageBuilder, sender.getUserId(), receiver.getUserId(), messageText);
-                    encryptionDecorator.sendMessage(sender, receiver, message);
-                    System.out.println("Message sent.");
+                    messageCommunicationFacade.sendMessage(sender, receiver, message);
                 }
                 case 5 -> {
                     User user = validSelection(authService, "user", isAdmin);
@@ -143,7 +141,7 @@ public class Main {
                         break;
                     }
 
-                    viewMessages(authService, userService, encryptionDecorator, selectedUser);
+                    messageCommunicationFacade.receiveMessageUser(selectedUser, inputPassword());
                 }
                 case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
@@ -191,8 +189,8 @@ public class Main {
 
     private static void AdminUserFunctionality(UserAuthenticationService authService,
                                                UserManagementService userService,
-                                               MessageServiceDecorator encryptionDecorator,
-                                               UserAdditionService userAuthenticationAdapter) {
+                                               UserAdditionService userAuthenticationAdapter,
+                                               MessageCommunicationFacade messageCommunicationFacade) {
         while (true) {
             int choice = AdminUserMenu();
             boolean isAdmin = true;
@@ -252,7 +250,7 @@ public class Main {
                         break;
                     }
 
-                    viewMessagesAdmin(userService, encryptionDecorator, selectedUser);
+                    messageCommunicationFacade.viewMessageAdmin(selectedUser);
                 }
                 case 7 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
@@ -276,43 +274,6 @@ public class Main {
             }
         }
 
-    }
-
-    private static void viewMessages(UserAuthenticationService authService, UserManagementService userService, MessageServiceDecorator messageService, User selectedUser) {
-        String input = inputPassword();
-        User loggedInUser = authService.login(selectedUser.getUsername(), input);
-        System.out.println("Messages for " + selectedUser.getUsername() + ":");
-        List<Message> messages = messageService.getMessages(selectedUser);
-
-        if (loggedInUser == null) {
-            messages = messageService.getMessages(selectedUser);
-        }
-        else {
-            messages = messageService.sendUserMessages(messages);
-        }
-
-        PrintMessages(userService, messages);
-    }
-
-    private static void viewMessagesAdmin(UserManagementService userService, MessageServiceDecorator messageService, User selectedUser) {
-        System.out.println("Messages for " + selectedUser.getUsername() + ":");
-        List<Message> messages = messageService.getMessages(selectedUser);
-        messages = messageService.sendUserMessages(messages);
-
-        PrintMessages(userService, messages);
-    }
-
-    private static void PrintMessages(UserManagementService userService, List<Message> messages) {
-        for (Message msg : messages) {
-            User senderUser = userService.getUserById(msg.getSenderId());
-            if (senderUser != null) {
-                System.out.println("From: " + senderUser.getUsername() + ", Message: " + msg.getMessageData() +
-                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus() + ", ID: " + msg.getMessageId());
-            } else {
-                System.out.println("From: Nonexistent user, Message: " + msg.getMessageData() +
-                        ", Type: " + msg.getMessageType() + ", Date: " + msg.getDate() + ", Status: " + msg.getMessageStatus() + ", ID: " + msg.getMessageId());
-            }
-        }
     }
 
     private static int CommonMenu() {
@@ -340,8 +301,7 @@ public class Main {
         UserAdditionService userAuthenticationAdapter = new UserAuthenticationAdapter(authService);
 
         MessageStorage messageStorage = new MessageStorageImpl();
-        MessageService messageService = new MessageServiceImpl(messageStorage);
-        MessageServiceDecorator encryptionDecorator = new EncryptionDecorator(messageService);
+        MessageCommunicationFacade messageCommunicationFacade = new MessageCommunicationFacade(messageStorage, userService, authService);
 
         MessageBuilder messageBuilder = new MessageDataBuilder();
         MessageDirector messageDirector = new MessageDirector();
@@ -359,8 +319,8 @@ public class Main {
 
             switch (choice) {
 
-                case 1 -> AdminUserFunctionality(authService, userService, encryptionDecorator, userAuthenticationAdapter);
-                case 2 -> RegularUserFunctionality(authService, userService, encryptionDecorator, messageDirector, messageBuilder);
+                case 1 -> AdminUserFunctionality(authService, userService, userAuthenticationAdapter, messageCommunicationFacade);
+                case 2 -> RegularUserFunctionality(authService, userService, messageDirector, messageBuilder, messageCommunicationFacade);
                 case 3 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();

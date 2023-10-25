@@ -3,11 +3,12 @@ package management;
 import objectpool.UserPool;
 import singleton.UserManager;
 import user.User;
+import user.UserIdGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserManagementServiceImpl implements UserManagementService, UserAdditionService{
+public class UserManagementServiceImpl implements UserManagementService, UserAdditionService {
 
         private final UserManager userManager;
         private final UserPool userPool;
@@ -55,10 +56,8 @@ public class UserManagementServiceImpl implements UserManagementService, UserAdd
 
         @Override
         public void addUser(String username, String password, boolean isAdmin) {
-                // TODO: Change this to use a unique userId
-                String userId = "1";
+                String userId = UserIdGenerator.generateUniqueUserId();
                 User user = userPool.acquireUser(userId, username, password, isAdmin);
-
                 userManager.getUsers().put(username, user);
         }
 
