@@ -29,5 +29,6 @@ bin/
 .DS_Store
 
 ### Optional ###
-.idea
-untitled.iml
+*.idea
+*.iml
+*.sh

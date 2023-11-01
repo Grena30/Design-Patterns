@@ -4,6 +4,9 @@ import facade.MessageCommunicationFacade;
 import management.*;
 import messaging.*;
 import objectpool.*;
+import observer.ChatRoom;
+import observer.EventListener;
+import observer.UserLoginListener;
 import singleton.*;
 import strategy.CaesarCipher;
 import strategy.EncryptionStrategy;
@@ -11,7 +14,9 @@ import strategy.VigenereCipher;
 import user.*;
 import builder.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -83,7 +88,9 @@ public class Main {
                                                  UserManagementService userService,
                                                  MessageDirector messageDirector,
                                                  MessageBuilder messageBuilder,
-                                                 MessageCommunicationFacade messageCommunicationFacade) {
+                                                 MessageCommunicationFacade messageCommunicationFacade,
+                                                 ChatRoom chatRoom,
+                                                 Map<String, EventListener>  eventListeners) {
         while (true) {
             int choice = RegularUserMenu();
             boolean isAdmin = false;
@@ -94,7 +101,7 @@ public class Main {
                     authService.registerUser(input.get(0), input.get(1), isAdmin);
                     System.out.println("User registered: " + input.get(0));
                 }
-                case 2 -> login(authService);
+                case 2 -> loginRegularUser(authService, chatRoom, eventListeners);
                 case 3 -> {
                     User selectedUser = validSelection(authService, "user", isAdmin);
 
@@ -154,7 +161,10 @@ public class Main {
                     }
 
                     authService.logout(selectedUser);
-                    System.out.println(selectedUser.getUsername() + " logged out successfully.");
+                    EventListener userToLogout = eventListeners.get(selectedUser.getUsername());
+                    chatRoom.events.unsubscribe("log-in", userToLogout);
+                    chatRoom.events.unsubscribe("log-out", userToLogout);
+                    chatRoom.logout(selectedUser.getUsername());
                 }
                 case 8 -> {
                     return;
@@ -179,6 +189,22 @@ public class Main {
                 System.out.println("Login failed. Invalid credentials.");
             }
         }
+
+    private static void loginRegularUser(UserAuthenticationService authService, ChatRoom chatRoom, Map<String, EventListener> eventListeners) {
+        List<String> input = inputPrompt();
+        User loggedInUser = authService.login(input.get(0), input.get(1));
+        if (loggedInUser != null) {
+            System.out.println("User logged in: " + loggedInUser.getUsername());
+            chatRoom.login(input.get(0));
+            EventListener newUser = new UserLoginListener(input.get(0));
+            eventListeners.put(input.get(0), newUser);
+            chatRoom.events.subscribe("log-out", newUser);
+            chatRoom.events.subscribe("log-in", newUser);
+
+        } else {
+            System.out.println("Login failed. Invalid credentials.");
+        }
+    }
 
     private static int AdminUserMenu() {
         System.out.println("\nManagement Menu:");
@@ -298,6 +324,7 @@ public class Main {
     public static void main(String[] args) {
         UserManager userManager = UserManagerImpl.getInstance();
         UserPool userPool = new UserPoolImpl(10);
+        ChatRoom chatRoom = new ChatRoom();
 
         UserAuthenticationService authService = new UserAuthenticationServiceImpl(userPool, userManager);
         UserManagementService userService = new UserManagementServiceImpl(userPool, userManager);
@@ -310,7 +337,7 @@ public class Main {
 
         MessageBuilder messageBuilder = new MessageDataBuilder();
         MessageDirector messageDirector = new MessageDirector();
-
+        Map<String, EventListener> eventListeners = new HashMap<>();
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
@@ -325,7 +352,7 @@ public class Main {
             switch (choice) {
 
                 case 1 -> AdminUserFunctionality(authService, userService, userAuthenticationAdapter, messageCommunicationFacade);
-                case 2 -> RegularUserFunctionality(authService, userService, messageDirector, messageBuilder, messageCommunicationFacade);
+                case 2 -> RegularUserFunctionality(authService, userService, messageDirector, messageBuilder, messageCommunicationFacade, chatRoom, eventListeners);
                 case 3 -> {
                     System.out.println("Exiting Application.");
                     scanner.close();
