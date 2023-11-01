@@ -2,8 +2,6 @@ package adapter;
 
 import auth.UserAuthenticationService;
 import management.UserAdditionService;
-import user.User;
-import user.UserType;
 
 
 public class UserAuthenticationAdapter implements UserAdditionService {

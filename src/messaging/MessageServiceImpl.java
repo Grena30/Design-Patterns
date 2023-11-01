@@ -29,7 +29,7 @@ public class MessageServiceImpl implements MessageService{
     }
 
     @Override
-    public List<Message> sendUserMessages(List<Message> messages) {
+    public List<Message> sendUserMessages(List<Message> messages, User user) {
             return messages;
     }
 

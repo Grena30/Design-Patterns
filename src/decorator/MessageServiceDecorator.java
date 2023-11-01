@@ -2,6 +2,7 @@ package decorator;
 
 import messaging.Message;
 import messaging.MessageService;
+import strategy.EncryptionStrategy;
 import user.User;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class MessageServiceDecorator implements MessageService {
     }
 
     @Override
-    public List<Message> sendUserMessages(List<Message> messages) {
-        return messageService.sendUserMessages(messages);
+    public List<Message> sendUserMessages(List<Message> messages, User user) {
+        return messageService.sendUserMessages(messages, user);
     }
 }

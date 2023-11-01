@@ -5,6 +5,9 @@ import management.*;
 import messaging.*;
 import objectpool.*;
 import singleton.*;
+import strategy.CaesarCipher;
+import strategy.EncryptionStrategy;
+import strategy.VigenereCipher;
 import user.*;
 import builder.*;
 
@@ -301,7 +304,9 @@ public class Main {
         UserAdditionService userAuthenticationAdapter = new UserAuthenticationAdapter(authService);
 
         MessageStorage messageStorage = new MessageStorageImpl();
-        MessageCommunicationFacade messageCommunicationFacade = new MessageCommunicationFacade(messageStorage, userService, authService);
+        EncryptionStrategy caesarCipher = new CaesarCipher();
+        EncryptionStrategy vigenereCipher = new VigenereCipher();
+        MessageCommunicationFacade messageCommunicationFacade = new MessageCommunicationFacade(messageStorage, userService, authService, vigenereCipher);
 
         MessageBuilder messageBuilder = new MessageDataBuilder();
         MessageDirector messageDirector = new MessageDirector();
