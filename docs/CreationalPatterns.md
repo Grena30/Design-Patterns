@@ -28,7 +28,7 @@ developers can improve the flexibility, maintainability, and scalability of thei
 Factory Method is a creational design pattern that provides an interface for creating 
 objects in a superclass, but allows subclasses to alter the type of objects that will 
 be created.
-```
+```java
 public class AdminFactory implements UserFactory {
     @Override
     public User createUser(String userId, String username, String password) {
@@ -46,7 +46,7 @@ public class RegularUserFactory implements UserFactory {
 ### Singleton:
 Singleton is a creational design pattern that lets you ensure that a class has 
 only one instance, while providing a global access point to this instance.
-```
+```java
 public class UserManagerImpl implements UserManager{
     private static UserManagerImpl instance;
     private final Map<String, User> users;
@@ -70,7 +70,7 @@ public class UserManagerImpl implements UserManager{
 Object Pooling is a creational design pattern that pre-instantiates all the objects 
 you’ll need at any specific moment before gameplay. This removes the need to create 
 new objects or destroy old ones while the application is running.
-```
+```java
 public class UserPoolImpl implements UserPool{
 
     public UserPoolImpl(int maxSize, UserFactory regularFactory, UserFactory adminFactory) {
@@ -99,7 +99,7 @@ public class UserPoolImpl implements UserPool{
 Builder is a creational design pattern that lets you construct complex objects step 
 by step. The pattern allows you to produce different types and representations of an 
 object using the same construction code.
-```
+```java
 public class MessageDataBuilder implements MessageBuilder{
     @Override
     public void setMessageId(String messageId) {

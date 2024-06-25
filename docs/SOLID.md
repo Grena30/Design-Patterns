@@ -35,7 +35,7 @@ community and can be applied to any object-oriented programming language.
 
 The interface which defines the methods for user authentication.
 
-```
+```java
 public interface UserAuthenticationService {
     RegularUser registerUser(String username, String password);
     RegularUser login(String username, String password);
@@ -46,7 +46,7 @@ public interface UserAuthenticationService {
 
 A sample method from the implementation of the interface.
 
-```
+```java
 public class UserAuthenticationServiceImpl implements UserAuthenticationService{
     private UserManager userManager = UserManager.getInstance();
     private Set<String> loggedInUsers = new HashSet<>();
@@ -69,7 +69,7 @@ public class UserAuthenticationServiceImpl implements UserAuthenticationService{
 
 The interface which defines the methods for user management.
 
-```
+```java
 public interface UserManagementService {
     RegularUser getUserById(String userId);
     void updateUserProfile(RegularUser user, UserProfile profileData);
@@ -80,7 +80,7 @@ public interface UserManagementService {
 
 A sample method from the implementation of the interface.
 
-```
+```java
 public class UserManagementServiceImpl implements UserManagementService{
 
         private UserManager userManager = UserManager.getInstance();
@@ -103,7 +103,7 @@ The messaging is about storing and retrieving/sending messages.
 Here is a sample of the interface which defines the methods
 for a simple text message.
 
-```
+```java
 public interface Message {
     String getMessageId();
     String getSenderId();
@@ -116,7 +116,7 @@ public interface Message {
 
 A sample method from the implementation of the interface.
 
-```
+```java
 public class MessageText implements Message {
     private String messageId;
     private String senderId;
@@ -141,7 +141,7 @@ public class MessageText implements Message {
 A simple abstract class which defines the parameters and methods of the user.
 It is inherited by Regular User and Admin User.
 
-```
+```java
 abstract class User {
     private String userId;
     private String username;
@@ -159,7 +159,7 @@ abstract class User {
 
 Sample implementation of a method from Regular User.
 
-```
+```java
 public class RegularUser extends User{
 
     public RegularUser(String userId, String username, String password) {

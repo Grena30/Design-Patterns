@@ -26,7 +26,7 @@ flexible and extensible way.
 ### Facade:
 Facade is a structural design pattern that provides a simplified interface to a 
 library, a framework, or any other complex set of classes.
-```
+```java
 public class MessageCommunicationFacade {
     public MessageCommunicationFacade(MessageStorage messageStorage, ...) {
         ...
@@ -61,7 +61,7 @@ public class MessageCommunicationFacade {
 Decorator is a structural design pattern that lets you attach new behaviors to 
 objects by placing these objects inside special wrapper objects that contain the 
 behaviors.
-```
+```java
 public class MessageEncryptionDecorator extends MessageServiceDecorator {
 
     public MessageEncryptionDecorator(MessageService messageService) {
@@ -97,7 +97,7 @@ public class MessageEncryptionDecorator extends MessageServiceDecorator {
 ### Adapter:
 Adapter is a structural design pattern that allows objects with incompatible 
 interfaces to collaborate.
-```
+```java
 public class UserAuthenticationAdapter implements UserAdditionService {
 
     private final UserAuthenticationService userAuthenticationService;
@@ -116,7 +116,7 @@ public class UserAuthenticationAdapter implements UserAdditionService {
 Flyweight is a structural design pattern that lets you fit more objects into the 
 available amount of RAM by sharing common parts of state between multiple objects 
 instead of keeping all of the data in each object.
-```
+```java
 public class UserFactory {
     public static User getUser(String userId, String username, String password, UserType userType) {
         String key = username + userType.toString();

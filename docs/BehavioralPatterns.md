@@ -26,7 +26,7 @@ policies that can be reused across different objects and classes.
 Iterator is a behavioral design pattern that lets you traverse elements of a 
 collection without exposing its underlying representation (list, stack, tree, etc.).
 
-```
+```java
 public class MessageIteratorImpl implements MessageIterator {
     public MessageIteratorImpl(List<Message> messages) {
         this.messages = messages;
@@ -48,7 +48,7 @@ public class MessageIteratorImpl implements MessageIterator {
 Strategy is a behavioral design pattern that lets you define a family of algorithms, 
 put each of them into a separate class, and make their objects interchangeable.
 
-```
+```java
 public interface EncryptionStrategy {
     String encrypt(String message, String key);
     String decrypt(String message, String key);
@@ -72,7 +72,7 @@ public class CaesarCipher implements EncryptionStrategy {
 Observer is a behavioral design pattern that lets you define a subscription mechanism 
 to notify multiple objects about any events that happen to the object they’re observing.
 
-```
+```java
 public class EventManager {
     public void subscribe(String eventType, EventListener listener) {
         List<EventListener> users = listeners.get(eventType);
